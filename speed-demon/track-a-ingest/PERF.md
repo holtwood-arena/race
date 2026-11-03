@@ -50,6 +50,7 @@ Frozen spec：`spec.md`（官方仓库 `hackathon-raptors/speed-demon-2026` 拷�
 | 2 | 2026-11-03 | 本 commit | v2 C++ 单线程：mmap + memchr + unordered_map | 0.39 | 259 | 55×；RSS 大头是 mmap 文件页本身 |
 | 3 | 2026-11-03 | 本 commit | v3 C++ 12 线程：行界切块并行解析 + 合并 | 0.27 | 290 | 80×；仅比单线程快 1.44× |
 | 4 | 2026-11-03 | 本 commit | v4 = v3 + MADV_DONTNEED 逐段驱逐文件页 + 整块缓冲输出 | **0.27** | **156** | 时间持平，内存 −45% |
+| 5 | 2026-11-03 | 本 commit | 容器复测：gcc:15 allowlist 镜像 + 12CPU/8GB/无网/只读 data | 1.27 e2e | — | hash ✅；e2e 含 ~1s docker 启动开销，solve 仍 ~0.3s |
 
 ### v4 驱逐策略说明
 
@@ -82,7 +83,9 @@ K 的 M 项权重 0.20）与**输出路径**（bufio 替代逐行 fprintf）。
 - [x] v4 内存优化：驱逐文件页达成 156MB（未达 <100MB：剩余大头是 latency 数组
   ~40MB + 在飞文件页 ~90MB；再压需更小步长或 chunked read，收益递减）
 - [x] v4 输出优化：整块缓冲 + 手写 u32 格式化，一次 fwrite
-- [ ] 容器对齐：按官方 allowlist 做 `gcc:15` Dockerfile，容器内复测
+- [x] 容器对齐：`docker/Dockerfile`（gcc:15 digest 固定，x86-64-v3）+
+  `docker/run.sh` 模拟评分机约束，三档 hash 全对；WSL2 注意
+  credsStore=desktop.exe 会卡住匿名拉取，run.sh 已自动回退空 config
 - [x] ~~分位数 histogram~~：n 均值 ~24，全排序已足够快，不追
 
 ## 复现命令
@@ -98,5 +101,10 @@ python3 solutions/v1_bytes.py --data data/full-seed1 --out out/v1-full
 g++ -O3 -march=native -o bin/v2_single solutions/v2_single.cpp
 g++ -O3 -march=native -pthread -o bin/v3_parallel solutions/v3_parallel.cpp
 ./bin/v3_parallel --data data/full-seed1 --out out/v3-full
+# v4（当前最佳）
+g++ -O3 -march=native -pthread -o bin/v4_evict solutions/v4_evict.cpp
+./bin/v4_evict --data data/full-seed1 --out out/v4-full
+# 容器（评分机约束模拟）
+./docker/run.sh data/full-seed1 out/v4c-full
 sha256sum out/*/summary.txt   # 全部应等于 495ca096…
 ```

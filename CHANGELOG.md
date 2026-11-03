@@ -14,3 +14,5 @@
   → v3 C++ 12线程 0.27s（80×）；三档输出 hash 全部与官方一致，代码在 solutions/
 - Track A v4：MADV_DONTNEED 逐段驱逐 mmap 文件页 + 整块缓冲输出，
   时间持平 0.27s，峰值内存 290→156MB（−45%）
+- Track A 容器复测：docker/ 目录（gcc:15 allowlist 镜像 + run.sh 评分机约束），
+  12CPU/8GB/无网络下输出 hash 全对
