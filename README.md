@@ -25,7 +25,7 @@
 | speed-demon/track-a | 32.05 s（官方参考机） | 0.27 s（v4 C++ 12线程+驱逐，本机） | 80× | 156 MB | 2026-11-03 | hash ✅ 见 PERF.md |
 | speed-demon/track-b | 56.35 s | — | — | — | — | |
 | speed-demon/track-c | 14.44 s | — | — | — | — | hash 门槛最严 |
-| speed-demon/track-d | 72.69 s | — | — | — | — | |
+| speed-demon/track-d | 72.69 s | 1.55 s（v1 C++ CSR+并行，本机） | 45× | 254 MB | 2026-11-03 | hash ✅ 见 PERF.md |
 | 1brc | 官方基线 ~4 min（评测机） | — | — | — | — | 需自备生成器产数据 |
 
 ## 方法

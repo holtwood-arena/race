@@ -16,3 +16,6 @@
   时间持平 0.27s，峰值内存 290→156MB（−45%）
 - Track A 容器复测：docker/ 目录（gcc:15 allowlist 镜像 + run.sh 评分机约束），
   12CPU/8GB/无网络下输出 hash 全对
+- Track D 起步：官方 spec/生成器/参考实现入库，v1 C++（mmap 并行解析 + CSR +
+  查询级并行 Dijkstra）1.55s/254MB，三档输出 hash 与官方一致；PERF.md 记录
+  幻影边、cursor 竞争两个真实 bug 及定位过程

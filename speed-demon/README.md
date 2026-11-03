@@ -38,4 +38,4 @@ spec / 生成器 / 参考实现 / harness 均在官方仓库
 | `track-a-ingest/` | 解析赛道练习：spec + 生成器 + 参考实现 + [PERF.md](track-a-ingest/PERF.md)（基线已建） |
 | `track-b-index/` | 索引赛道练习 |
 | `track-c-join/` | CSV join 练习 |
-| `track-d-traverse/` | 最短路练习 |
+| `track-d-traverse/` | 最短路练习：spec + 生成器 + 参考实现 + [PERF.md](track-d-traverse/PERF.md)（v1 已建） |
