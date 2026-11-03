@@ -26,14 +26,16 @@ speed score = 50·log10(K)，占总分 65%；评委（代码质量/技术/PERF.m
 
 ## 获取数据
 
-官方完整数据集与 expected hash 于 kickoff（2026-10-30）发布，harness 随 10-28 冻结版发布。
-下载链接见官方 board 页。本目录 `data/` 已 gitignore。
+spec / 生成器 / 参考实现 / harness 均在官方仓库
+[hackathon-raptors/speed-demon-2026](https://github.com/hackathon-raptors/speed-demon-2026)。
+生成器确定性输出——`--seed 1 --scale {tiny,sample,full}` 本地生成与官方发布字节级一致
+（sha256 见各 spec §5，已实测核对）。本目录 `data/` 与 `out/` 已 gitignore。
 
 ## 目录
 
 | 子目录 | 说明 |
 |--------|------|
-| `track-a-ingest/` | 解析赛道练习（含 PERF.md 记录） |
+| `track-a-ingest/` | 解析赛道练习：spec + 生成器 + 参考实现 + [PERF.md](track-a-ingest/PERF.md)（基线已建） |
 | `track-b-index/` | 索引赛道练习 |
 | `track-c-join/` | CSV join 练习 |
 | `track-d-traverse/` | 最短路练习 |

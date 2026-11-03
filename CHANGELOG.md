@@ -7,3 +7,6 @@
 - 初始化：题库目录（speed-demon / 1brc / ppc / dimacs-sp / ahc）、README 成绩台账、
   tools/bench.sh、docs/playbook.md、MIT LICENSE
 - 补充 AGENTS.md 工作约定、docs/environment.md 测量环境、docs/perf-template.md 记录模板
+- Speed Demon Track A 起步：拷入官方 spec/生成器/参考实现，本地生成三档数据集并核对
+  sha256；参考实现基线 21.57 s / 213 MB（本机），输出 hash 与 spec §5 官方值一致；
+  新建 track-a-ingest/PERF.md 记录瓶颈分析与优化方向
