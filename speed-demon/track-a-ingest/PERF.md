@@ -48,7 +48,16 @@ Frozen spec：`spec.md`（官方仓库 `hackathon-raptors/speed-demon-2026` 拷�
 | 0 | 2026-11-03 | 本 commit | 官方 Python 参考基线 | 21.57 | 213 | hash ✅，作为一切相对比较的锚点 |
 | 1 | 2026-11-03 | 本 commit | v1 字节解析：整块读入 + 整数键分组 | 4.05 | 413 | 5.3×；内存 +200MB 来自全量驻留 + int list |
 | 2 | 2026-11-03 | 本 commit | v2 C++ 单线程：mmap + memchr + unordered_map | 0.39 | 259 | 55×；RSS 大头是 mmap 文件页本身 |
-| 3 | 2026-11-03 | 本 commit | v3 C++ 12 线程：行界切块并行解析 + 合并 | **0.27** | 290 | 80×；仅比单线程快 1.44× |
+| 3 | 2026-11-03 | 本 commit | v3 C++ 12 线程：行界切块并行解析 + 合并 | 0.27 | 290 | 80×；仅比单线程快 1.44× |
+| 4 | 2026-11-03 | 本 commit | v4 = v3 + MADV_DONTNEED 逐段驱逐文件页 + 整块缓冲输出 | **0.27** | **156** | 时间持平，内存 −45% |
+
+### v4 驱逐策略说明
+
+每线程消费 4MB 后，对已读区域做 `madvise(MADV_DONTNEED)`——mmap 的文件页
+在缺页时计入 RSS，驱逐后峰值只剩各线程在飞窗口（~12×4-8MB）+ 数据结构
+（latencies ~40MB）。零时间代价：约 60 次额外 madvise 调用。
+踩坑：endpoint 是 `string_view` 指进文件映射，`munmap` 必须留到进程退出
+（首版提前 munmap → segfault）。
 
 ### v3 并行加速比低的解释
 
@@ -70,8 +79,9 @@ K 的 M 项权重 0.20）与**输出路径**（bufio 替代逐行 fprintf）。
 
 ## 下一步
 
-- [ ] v4 内存优化：分块 read 替代整文件 mmap（目标 RSS < 100MB，K 的 M 项）
-- [ ] v4 输出优化：整块缓冲 fwrite 替代逐行 fprintf
+- [x] v4 内存优化：驱逐文件页达成 156MB（未达 <100MB：剩余大头是 latency 数组
+  ~40MB + 在飞文件页 ~90MB；再压需更小步长或 chunked read，收益递减）
+- [x] v4 输出优化：整块缓冲 + 手写 u32 格式化，一次 fwrite
 - [ ] 容器对齐：按官方 allowlist 做 `gcc:15` Dockerfile，容器内复测
 - [x] ~~分位数 histogram~~：n 均值 ~24，全排序已足够快，不追
 

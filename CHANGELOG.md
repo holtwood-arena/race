@@ -12,3 +12,5 @@
   新建 track-a-ingest/PERF.md 记录瓶颈分析与优化方向
 - Track A 优化三轮：v1 Python 字节解析 4.05s（5.3×）→ v2 C++ 单线程 mmap 0.39s（55×）
   → v3 C++ 12线程 0.27s（80×）；三档输出 hash 全部与官方一致，代码在 solutions/
+- Track A v4：MADV_DONTNEED 逐段驱逐 mmap 文件页 + 整块缓冲输出，
+  时间持平 0.27s，峰值内存 290→156MB（−45%）
