@@ -46,13 +46,47 @@ Frozen spec：`spec.md`（官方仓库 `hackathon-raptors/speed-demon-2026` 拷�
 | # | 日期 | commit | 改动 | T (s) | M (MB) | 结论 |
 |---|------|--------|------|-------|--------|------|
 | 0 | 2026-11-03 | 本 commit | 官方 Python 参考基线 | 21.57 | 213 | hash ✅，作为一切相对比较的锚点 |
+| 1 | 2026-11-03 | 本 commit | v1 字节解析：整块读入 + 整数键分组 | 4.05 | 413 | 5.3×；内存 +200MB 来自全量驻留 + int list |
+| 2 | 2026-11-03 | 本 commit | v2 C++ 单线程：mmap + memchr + unordered_map | 0.39 | 259 | 55×；RSS 大头是 mmap 文件页本身 |
+| 3 | 2026-11-03 | 本 commit | v3 C++ 12 线程：行界切块并行解析 + 合并 | **0.27** | 290 | 80×；仅比单线程快 1.44× |
+
+### v3 并行加速比低的解释
+
+0.39s → 0.27s 远低于 12 线程理论值。此规模下瓶颈已不是逐行解析：
+- 239MB 的 mmap 缺页 + 内存带宽是共享地板
+- 串行尾：合并分组 + 每组排序 + 127k 行 fprintf 输出不可分摊
+- unordered_map 查找与 vector push_back 本身已接近缓存友好下限
+
+结论：Track A 在"能并行解析"解决后进入收益递减区；下一步收益在
+**内存**（mmap 页计入 RSS，换成分块 read 可把 290MB 压到 ~50MB，
+K 的 M 项权重 0.20）与**输出路径**（bufio 替代逐行 fprintf）。
 
 ## 失败 / 回退记录
 
-- （暂无）
+- v1 首跑 `IndexError`：hidx 是跨 4 天的绝对小时（实际取值 18–89），按 72 开数组越界。
+  改 SPAN_DAYS*24=96 后通过——教训：输出排序的小时枚举范围 ≠ 数据集小时数。
+- v1 排序键一度用 (hidx<<11)|epid 直接排：ep_id 是首见顺序而非字节序，
+  会打乱同小时内 endpoint 次序。已修正为按小时桶内对 endpoint bytes 排序。
 
 ## 下一步
 
-- [ ] Python 优化版 v1：字节解析 + endpoint→id + 整数 key，目标 < 5 s
-- [ ] 评估分位数算法：全排序 vs 计数直方图（latency 是 uint32，范围大但每组 n 小，可能全排序反而快）
-- [ ] C++ 版：mmap + 多线程，对齐官方容器契约（`python:3.13-slim` → 需换 allowlist 内的 `gcc:15/16` 或 `debian:13-slim`）
+- [ ] v4 内存优化：分块 read 替代整文件 mmap（目标 RSS < 100MB，K 的 M 项）
+- [ ] v4 输出优化：整块缓冲 fwrite 替代逐行 fprintf
+- [ ] 容器对齐：按官方 allowlist 做 `gcc:15` Dockerfile，容器内复测
+- [x] ~~分位数 histogram~~：n 均值 ~24，全排序已足够快，不追
+
+## 复现命令
+
+```bash
+# 数据（确定性，sha256 见 spec §5）
+python3 generator/a_ingest.py --seed 1 --scale full --out data/full-seed1
+# 参考基线
+python3 reference/a_ingest.py --data data/full-seed1 --out out/ref-full
+# v1
+python3 solutions/v1_bytes.py --data data/full-seed1 --out out/v1-full
+# v2 / v3（产物在已忽略的 bin/）
+g++ -O3 -march=native -o bin/v2_single solutions/v2_single.cpp
+g++ -O3 -march=native -pthread -o bin/v3_parallel solutions/v3_parallel.cpp
+./bin/v3_parallel --data data/full-seed1 --out out/v3-full
+sha256sum out/*/summary.txt   # 全部应等于 495ca096…
+```
