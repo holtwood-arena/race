@@ -19,3 +19,5 @@
 - Track D 起步：官方 spec/生成器/参考实现入库，v1 C++（mmap 并行解析 + CSR +
   查询级并行 Dijkstra）1.55s/254MB，三档输出 hash 与官方一致；PERF.md 记录
   幻影边、cursor 竞争两个真实 bug 及定位过程
+- Track D v2 双向 Dijkstra：正确但实测更慢（2.33s vs 1.55s，内存翻倍），
+  记为否定实验——查询 rank 分布偏小导致双堆开销收不回；v1 保持最佳
