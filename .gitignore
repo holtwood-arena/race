@@ -1,0 +1,10 @@
+# 数据集与产物不入库（体积大、可从官方渠道再生成/下载）
+data/
+*.bin
+*.o
+*.out
+*.log
+__pycache__/
+bin/
+build/
+.DS_Store
