@@ -1,5 +1,7 @@
 # race — 性能工程竞赛实验室
 
+> Part of [holtwood-arena](https://github.com/holtwood-arena) · 比赛与 benchmark 归档
+
 > 集中研究与练习"同一任务、同一数据、同一机器，比参考实现更快"的赛事与公开题。
 > 每个性能数字都绑定硬件、commit、命令与原始输出；本机数字只用于迭代，不代表评测环境。
 
@@ -37,5 +39,6 @@
 
 ## 相关仓库
 
-- 赛事提交物（赛期私有、赛后公开）：`speed-demon-2026`、`flagos-s2-*` 等，见 [repos-db](https://github.com/holtwood/repos-db) 竞赛索引
+- 赛事工作区：赛期私有，赛后按规则公开；公开入口见 [holtwood-arena](https://github.com/holtwood-arena)
+- 通用仓库导航：[holtwood/repos-db](https://github.com/holtwood/repos-db)
 - 本仓只放练习与研究，不是任何比赛的提交格式
